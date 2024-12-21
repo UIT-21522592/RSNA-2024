@@ -1,0 +1,45 @@
+/* Global styles for the page */
+body {
+    background-color: #f0f4f8;
+    font-family: 'Arial', sans-serif;
+    color: #333;
+}
+
+/* Header styling */
+h1 {
+    color: #2D3E50;
+    text-align: center;
+    font-size: 2.5em;
+}
+
+/* Sidebar styling */
+.sidebar {
+    background-color: #081029;
+    color: white;
+    padding: 20px;
+}
+
+.sidebar a {
+    color: white;
+    text-decoration: none;
+    display: block;
+    padding: 10px;
+}
+
+.sidebar a:hover {
+    background-color: #0c2449;
+}
+
+/* Button styling */
+button {
+    background-color: #3caf40;
+    color: white;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #1b7920;
+}

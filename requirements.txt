@@ -1,0 +1,22 @@
+--extra-index-url https://download.pytorch.org/whl/cu121
+torch
+torchvision
+torchaudio
+opencv-python
+opencv-python-headless
+# mmcv==2.0.0
+# mmdet==3.0.0
+# mmengine==0.10.3
+# mmyolo==0.6.0
+nbformat 
+pydicom
+streamlit
+plotly
+timm==0.6.13
+transformers==4.36.2
+albumentations
+pandas
+numpy
+Pillow
+tqdm
+ultralytics
