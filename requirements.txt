@@ -8,6 +8,8 @@ opencv-python-headless
 # mmdet==3.0.0
 # mmengine==0.10.3
 # mmyolo==0.6.0
+# mayavi # For 2D, 3D plotting
+scikit-image
 nbformat 
 pydicom
 streamlit

@@ -71,18 +71,20 @@ def plot_spine_predictions(image_path, model_path,
         boxes = results[0].boxes.cpu().numpy()
         
         # Sort boxes by y-coordinate to display levels in order
+        
         box_data = []
         for box in boxes:
             cls_id = int(box.cls[0])
             conf = box.conf[0]
             x1, y1, x2, y2 = box.xyxy[0]
             box_data.append((y1, cls_id, conf, x1, y1, x2, y2))
-        
+
         box_data.sort()  # Sort by y1 coordinate
         
         # Plot each detection
         for i, (_, cls_id, conf, x1, y1, x2, y2) in enumerate(box_data):
             color = colors[cls_id]
+            
             level_name = level_names[cls_id]
             
             # Draw bounding box
@@ -107,6 +109,300 @@ def plot_spine_predictions(image_path, model_path,
     plt.axis('off')
     plt.tight_layout()
     st.pyplot(fig)
+
+# def plot_spine_predictions_condition(image_path, model_path_1, model_path_2, model_path_3, conf_threshold=0.25, iou_threshold=0.45, img_size=384, axial = 0):
+#     """
+#     Plot YOLO predictions for spine levels on a DICOM image
+    
+#     Args:
+#         image_path: Path to DICOM image
+#         model_path: Path to saved YOLO model
+#         conf_threshold: Confidence threshold for predictions
+#         iou_threshold: IOU threshold for NMS
+#         img_size: Image size for model input
+#     """
+#     # Load model
+#     model_level = YOLO(model_path_1)
+#     model_condition = YOLO(model_path_2)
+#     model_target = YOLO(model_path_3)
+#     # Read DICOM
+#     ds = pydicom.dcmread(image_path)
+#     image = ds.pixel_array
+    
+#     # Normalize and resize
+#     image_normalized = cv2.normalize(image, None, 0, 255, cv2.NORM_MINMAX, cv2.CV_8U)
+#     image_resized = cv2.resize(image_normalized, (img_size, img_size))
+    
+#     # Convert grayscale to RGB
+#     image_rgb = np.stack([image_resized] * 3, axis=-1)
+    
+#     # Create figure
+#     fig = plt.figure(figsize=(15, 7))
+    
+#     # Plot original image
+#     plt.subplot(1, 2, 1)
+#     plt.imshow(image_resized, cmap='gray')
+#     plt.title('Original Image')
+#     plt.axis('off')
+#     # st.pyplot(fig)
+
+    
+#     # Plot image with predictions
+#     plt.subplot(1, 2, 2)
+#     plt.imshow(image_resized, cmap='gray')
+#     plt.title('Predictions')
+#     plt.axis('off')
+#     # st.pyplot(fig)
+
+#     # Get predictions
+#     results_level = model_level.predict(
+#         source=image_rgb,
+#         conf=conf_threshold,
+#         iou=iou_threshold
+#     )
+    
+#     results_condition = model_condition.predict(
+#         source=image_rgb,
+#         conf=conf_threshold,
+#         iou=iou_threshold
+#     )
+#     results_target = model_target.predict(
+#         source=image_rgb,
+#         conf=conf_threshold,
+#         iou=iou_threshold
+#     )
+#     # Define colors for each level
+#     colors = ['red', 'green', 'blue', 'yellow', 'purple']
+#     if axial == 0:
+#         level_names = ['L1/L2', 'L2/L3', 'L3/L4', 'L4/L5', 'L5/S1'] # For sagittal
+#     else:
+#         level_names = ['left', 'right'] # For axial
+#     conditions_name = ['Spinal Canal Stenosis', 'Right Neural Foraminal Narrowing', 'Left Neural Foraminal Narrowing', 'Left Subarticular Stenosis', 'Right Subarticular Stenosis']
+#     target = ['Normal/Mild','Moderate','Severe']
+
+#     if results_level[0].boxes is not None and results_condition[0].boxes is not None and results_target[0].boxes is not None:
+#         boxes = results_level[0].boxes.cpu().numpy()
+#         condition_boxes = results_condition[0].boxes.cpu().numpy()
+#         target_boxes = results_condition[0].boxes.cpu().numpy()
+
+#         # Sort boxes by y-coordinate to display levels in order
+        
+#         box_data = []
+#         for box in boxes:
+#             cls_id = int(box.cls[0])
+#             conf = box.conf[0]
+#             x1, y1, x2, y2 = box.xyxy[0]
+#             box_data.append((y1, cls_id, conf, x1, y1, x2, y2))
+
+#         box_data.sort()  # Sort by y1 coordinate
+
+#         box_condition_data = []
+#         for box in condition_boxes:
+#             cls_id = int(box.cls[0])
+#             conf = box.conf[0]
+#             x1, y1, x2, y2 = box.xyxy[0]
+#             box_data.append((y1, cls_id, conf, x1, y1, x2, y2))
+
+#         box_condition_data.sort()  # Sort by y1 coordinate
+
+#         box_target_data = []
+#         for box in target_boxes:
+#             cls_id = int(box.cls[0])
+#             conf = box.conf[0]
+#             x1, y1, x2, y2 = box.xyxy[0]
+#             box_data.append((y1, cls_id, conf, x1, y1, x2, y2))
+
+#         box_target_data.sort()  # Sort by y1 coordinate
+        
+#         # Plot each level detection
+#         for i, (_, cls_id, conf, x1, y1, x2, y2) in enumerate(box_data):
+#             color = colors[cls_id]
+            
+#             level_name = level_names[cls_id]
+            
+#             # Draw bounding box
+#             plt.gca().add_patch(plt.Rectangle(
+#                 (x1, y1), x2-x1, y2-y1,
+#                 fill=False, color=color, linewidth=2
+#             ))
+            
+#             # Add label
+#             plt.text(
+#                 x2 + 5, (y1 + y2) / 2, 
+#                 f'{level_name}: {conf:.2f}',
+#                 color=color, fontsize=8, verticalalignment='center',
+#                 bbox=dict(facecolor='white', alpha=0.7, edgecolor='none')
+#             )
+            
+#             # Print detection info
+#             print(f"Found {level_name} with confidence {conf:.2f}")
+#         # Plot each condition detection
+#         for i, (_, cls_id, conf, x1, y1, x2, y2) in enumerate(box_condition_data):
+#             color = colors[cls_id]
+            
+#             conditions_name = conditions_name[cls_id]
+            
+#             # Draw bounding box
+#             plt.gca().add_patch(plt.Rectangle(
+#                 (x1, y1), x2-x1, y2-y1,
+#                 fill=False, color=color, linewidth=2
+#             ))
+            
+#             # Add label
+#             plt.text(
+#                 x2 + 5, (y1 + y2) / 2, 
+#                 f'{conditions_name}: {conf:.2f}',
+#                 color=color, fontsize=8, verticalalignment='center',
+#                 bbox=dict(facecolor='white', alpha=0.7, edgecolor='none')
+#             )
+            
+#             # Print detection info
+#             print(f"Found {conditions_name} with confidence {conf:.2f}")
+#         # Plot each target detection
+#         for i, (_, cls_id, conf, x1, y1, x2, y2) in enumerate(box_target_data):
+#             color = colors[cls_id]
+            
+#             target = target[cls_id]
+            
+#             # Draw bounding box
+#             plt.gca().add_patch(plt.Rectangle(
+#                 (x1, y1), x2-x1, y2-y1,
+#                 fill=False, color=color, linewidth=2
+#             ))
+            
+#             # Add label
+#             plt.text(
+#                 x2 + 5, (y1 + y2) / 2, 
+#                 f'{target}: {conf:.2f}',
+#                 color=color, fontsize=8, verticalalignment='center',
+#                 bbox=dict(facecolor='white', alpha=0.7, edgecolor='none')
+#             )
+            
+#             # Print detection info
+#             print(f"Found {target} with confidence {conf:.2f}")
+#     else:
+#         print("No detections found")
+    
+#     plt.axis('off')
+#     plt.tight_layout()
+#     st.pyplot(fig)
+
+def plot_spine_predictions_condition(image_path, model_path_1, model_path_2, model_path_3, 
+                                  conf_threshold=0.25, iou_threshold=0.45, img_size=384, axial=0):
+    # Load models
+    model_level = YOLO(model_path_1)
+    model_condition = YOLO(model_path_2) 
+    model_target = YOLO(model_path_3)
+
+    # Read and process image
+    ds = pydicom.dcmread(image_path)
+    image = ds.pixel_array
+    image_normalized = cv2.normalize(image, None, 0, 255, cv2.NORM_MINMAX, cv2.CV_8U)
+    image_resized = cv2.resize(image_normalized, (img_size, img_size))
+    image_rgb = np.stack([image_resized] * 3, axis=-1)
+
+    # Create figure
+    fig = plt.figure(figsize=(15, 7))
+    
+    # Plot original and prediction images
+    plt.subplot(1, 2, 1)
+    plt.imshow(image_resized, cmap='gray')
+    plt.title('Original Image')
+    plt.axis('off')
+
+    plt.subplot(1, 2, 2)
+    plt.imshow(image_resized, cmap='gray')
+    plt.title('Predictions')
+    plt.axis('off')
+
+    # Get predictions
+    results_level = model_level.predict(source=image_rgb, conf=conf_threshold, iou=iou_threshold)
+    results_condition = model_condition.predict(source=image_rgb, conf=conf_threshold, iou=iou_threshold)
+    results_target = model_target.predict(source=image_rgb, conf=conf_threshold, iou=iou_threshold)
+
+    # Define colors and names
+    colors = ['red', 'green', 'blue', 'yellow', 'purple']
+    level_names = ['L1/L2', 'L2/L3', 'L3/L4', 'L4/L5', 'L5/S1'] if axial == 0 else ['left', 'right']
+    condition_names = ['Spinal Canal Stenosis', 'Right Neural Foraminal Narrowing', 
+                      'Left Neural Foraminal Narrowing', 'Left Subarticular Stenosis', 
+                      'Right Subarticular Stenosis']
+    target_names = ['Normal/Mild', 'Moderate', 'Severe']
+
+    # Plot predictions
+    offset = 0  # Vertical offset for text placement
+    
+    # Plot level predictions
+    if results_level[0].boxes is not None:
+        boxes = results_level[0].boxes.cpu().numpy()
+        for box in boxes:
+            cls_id = int(box.cls[0])
+            conf = box.conf[0]
+            x1, y1, x2, y2 = box.xyxy[0]
+            
+            # Draw box
+            plt.gca().add_patch(plt.Rectangle(
+                (x1, y1), x2-x1, y2-y1,
+                fill=False, color=colors[cls_id], linewidth=2
+            ))
+            
+            # Add label
+            plt.text(
+                x2 + 5, (y1 + y2) / 2,
+                f'Level {level_names[cls_id]}: {conf:.2f}',
+                color=colors[cls_id], fontsize=8,
+                bbox=dict(facecolor='white', alpha=0.7, edgecolor='none')
+            )
+            offset += 20
+    
+    # Plot condition predictions
+    if results_condition[0].boxes is not None:
+        boxes = results_condition[0].boxes.cpu().numpy()
+        for box in boxes:
+            cls_id = int(box.cls[0])
+            conf = box.conf[0]
+            x1, y1, x2, y2 = box.xyxy[0]
+            
+            # Draw box with dashed line
+            plt.gca().add_patch(plt.Rectangle(
+                (x1, y1), x2-x1, y2-y1,
+                fill=False, color=colors[cls_id], linewidth=2, linestyle='--'
+            ))
+            
+            # Add label
+            plt.text(
+                x2 + 5, (y1 + y2) / 2 + 10,
+                f'Condition {condition_names[cls_id]}: {conf:.2f}',
+                color=colors[cls_id], fontsize=8,
+                bbox=dict(facecolor='white', alpha=0.7, edgecolor='none')
+            )
+            offset += 20
+
+    # Plot target predictions
+    if results_target[0].boxes is not None:
+        boxes = results_target[0].boxes.cpu().numpy()
+        for box in boxes:
+            cls_id = int(box.cls[0])
+            conf = box.conf[0]
+            x1, y1, x2, y2 = box.xyxy[0]
+            
+            # Draw box with dotted line
+            plt.gca().add_patch(plt.Rectangle(
+                (x1, y1), x2-x1, y2-y1,
+                fill=False, color=colors[cls_id], linewidth=2, linestyle=':'
+            ))
+            
+            # Add label
+            plt.text(
+                x2 + 5, (y1 + y2) / 2,
+                f'Target {target_names[cls_id]}: {conf:.2f}',
+                color=colors[cls_id], fontsize=8,
+                bbox=dict(facecolor='white', alpha=0.7, edgecolor='none')
+            )
+            offset += 20
+
+    plt.tight_layout()
+    st.pyplot(fig)
+
 
 def load_css():
     with open("./style/styles.css") as f:
@@ -137,11 +433,15 @@ from function import visualize_3d_plotly
 from ultralytics import YOLO
 
 # Import the model
-model_axial = YOLO("./YOLOv8model/axial_t2_spine_detector.pt")
-model_sagittal_T1 = YOLO("./YOLOv8model/sagittal_t1_spine_detector.pt")
-model_sagittal_T2 = YOLO("./YOLOv8model/sagittal_t2_spine_detector.pt")
-model_condition = YOLO("./YOLOv8model/condition_detector.pt")
-
+model_axial = "./YOLOv8model/axial_t2_spine_detector.pt"
+model_sagittal_T1 = "./YOLOv8model/sagittal_t1_spine_detector.pt"
+model_sagittal_T2 = "./YOLOv8model/sagittal_t2_spine_detector.pt"
+model_axial_condition = "./YOLOv8model/axial_t2_spine_condition_detector.pt"
+model_sagittal_T1_condition = "./YOLOv8model/sagittal_t1_spine_condition_detector.pt"
+model_sagittal_T2_condition = "./YOLOv8model/sagittal_t2_spine_condition_detector.pt"
+model_sagittal_T1_target = "./YOLOv8model/sagittal_t1_spine_target_detector.pt"
+model_sagittal_T2_target = "./YOLOv8model/sagittal_t2_spine_target_detector.pt"
+model_axial_target = "./YOLOv8model/axial_t2_spine_target_detector.pt"
 # Read data
 train_df = pd.read_csv("./train.csv")
 # Add custom CSS for font size styling for selectbox components
@@ -196,4 +496,5 @@ if content_choice == "Gallery":
 if content_choice == "Spine Prediction":  
     uploaded_files =  st.sidebar.file_uploader("Upload an Spine MRI Image (dicom)",type=['dcm'])
     if uploaded_files is not None:
-        plot_spine_predictions(uploaded_files,"./YOLOv8model/sagittal_t1_spine_detector.pt")
+        # plot_spine_predictions(uploaded_files,"./YOLOv8model/sagittal_t2_spine_detector.pt")
+        plot_spine_predictions_condition(uploaded_files, model_sagittal_T1, model_sagittal_T1_condition, model_sagittal_T1_target, axial = 0)
